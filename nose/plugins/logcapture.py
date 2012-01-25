@@ -231,6 +231,16 @@ class LogCapture(Plugin):
         return [safe_str(format(r)) for r in self.handler.buffer]
 
     def addCaptureToErr(self, ev, records):
+        if isinstance(ev, Exception):
+            # see http://blog.ianbicking.org/2007/09/12/re-raising-exceptions/ for ideas
+            if not ev.args:
+                orig_message = ''
+            else:
+                orig_message = safe_str(ev.args[0])
+            ev.args = '\n'.join([orig_message, ln('>> begin captured logging <<')] + \
+                                records + \
+                                [ln('>> end captured logging <<')]), 
+            return ev
         return '\n'.join([safe_str(ev), ln('>> begin captured logging <<')] + \
                           records + \
                           [ln('>> end captured logging <<')])
